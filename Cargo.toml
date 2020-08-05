@@ -6,12 +6,4 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-name = "load_tester_lib"
-path = "src/lib.rs"
-
-[[bin]]
-name = "load_tester"
-path = "src/main.rs"
-
 [dependencies]
