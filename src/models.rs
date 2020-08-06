@@ -12,9 +12,10 @@ pub struct Config {
 #[derive(Debug)]
 pub struct RequestResult {
     pub url: String,
-    pub status: u32,
+    pub status: u16,
     pub did_succeed: bool,
     pub duration: f64,
+    pub run: usize,
 }
 
 impl RequestResult {
@@ -24,9 +25,9 @@ impl RequestResult {
     ///
     /// # Examples
     ///```
-    ///let request_result = RequestResult::new("localhost:5001", 200, 2.0);
+    /// let request_result = RequestResult::new("localhost:5001", 200, Duration::from_secs(2,0));
     ///```
-    pub fn new(url: &str, status: u32, duration: f64) -> RequestResult {
+    pub fn new(url: &str, status: u16, dur: Duration, run_num: usize) -> RequestResult {
         RequestResult {
             url: String::from(url),
             status,
@@ -35,7 +36,8 @@ impl RequestResult {
             } else {
                 false
             },
-            duration,
+            duration: dur.as_secs_f64(),
+            run: run_num,
         }
     }
 }
@@ -92,11 +94,12 @@ impl LoadResults {
     ///     }
     /// ] */
     /// ```
-    pub fn add_result(&mut self, res: &RequestResult) {
+    pub fn add_result(&mut self, res: RequestResult) {
         self.total_requests += 1;
         match res.did_succeed {
             true => self.successes += 1,
             false => self.failures += 1,
         }
+        self.results.push(res);
     }
 }

@@ -7,8 +7,8 @@ mod models;
 mod statistics;
 
 use crate::load::run_load_test;
-use models::Config;
 use error::Result;
+use models::Config;
 
 /// Loads the config.ron file into a struct
 fn load_config() -> Result<Config> {
@@ -36,5 +36,4 @@ async fn main() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
 }
