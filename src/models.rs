@@ -1,22 +1,32 @@
 use serde::Deserialize;
 use std::time::Duration;
 
+/// Models the configuration provided in config.ron
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub urls: Vec<String>,
     pub runs: i32,
 }
 
+/// Models the needed information from a request
 #[derive(Debug)]
 pub struct RequestResult {
     pub url: String,
     pub status: u32,
     pub did_succeed: bool,
-    pub duration: Duration,
+    pub duration: f64,
 }
 
 impl RequestResult {
-    pub fn new(url: &str, status: u32, duration: Duration) -> RequestResult {
+    /// Creates a new RequestResult
+    ///
+    /// Takes the given values and returns a fully initialized RequestResult
+    ///
+    /// # Examples
+    ///```
+    ///let request_result = RequestResult::new("localhost:5001", 200, 2.0);
+    ///```
+    pub fn new(url: &str, status: u32, duration: f64) -> RequestResult {
         RequestResult {
             url: String::from(url),
             status,
@@ -31,6 +41,7 @@ impl RequestResult {
 }
 
 /// Represents the results for the entire load test
+#[derive(Debug)]
 pub struct LoadResults {
     pub total_requests: usize,
     pub successes: usize,
@@ -42,23 +53,50 @@ pub struct LoadResults {
 }
 
 impl LoadResults {
-    pub fn new(total_run_time: f64, mean: f64, median: f64, results_vec: Vec<RequestResult>) -> LoadResults {
-        let (mut successes_count, mut failures_count) = (0, 0);
-        for res in results_vec.iter() {
-            match res.did_succeed {
-                true => success += 1,
-                false => failures_count += 1,
-            }
-        }
-
+    /// Creates a new LoadResults with default values
+    ///
+    /// # Examples
+    /// ```
+    /// let load_results = LoadResults::new();
+    /// ```
+    pub fn new() -> LoadResults {
         LoadResults {
-            total_requests: results_vec.len(),
-            successes: successes_count,
-            failures: failures_count,
-            total_time: total_run_time,
-            mean_request_time: mean,
-            median_request_time: median,
-            results: results_vec
+            total_requests: 0,
+            successes: 0,
+            failures: 0,
+            total_time: 0.0,
+            mean_request_time: 0.0,
+            median_request_time: 0.0,
+            results: vec![],
+        }
+    }
+
+    /// Adds a result to the LoadResults
+    ///
+    /// Adds a result to LoadResults. It will also increment total_requests and success or failures
+    /// based on the information provided from the new RequestResult
+    ///
+    /// # Examples
+    /// ```
+    /// let mut load_result = LoadResult::new();
+    /// let request_result = RequestResult::new("localhost:5001", 200, 2.0);
+    ///
+    /// load_result.add_result(request_result);
+    ///
+    /// /* load_result.results is now results: [
+    ///     RequestResult{
+    ///         url: "localhost:5001",
+    ///         status: 200,
+    ///         did_succeed: 200,
+    ///         duration: 2.0
+    ///     }
+    /// ] */
+    /// ```
+    pub fn add_result(&mut self, res: &RequestResult) {
+        self.total_requests += 1;
+        match res.did_succeed {
+            true => self.successes += 1,
+            false => self.failures += 1,
         }
     }
 }
