@@ -2,14 +2,14 @@ use serde::Deserialize;
 use std::time::Duration;
 
 /// Models the configuration provided in config.ron
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Config {
     pub urls: Vec<String>,
     pub runs: i32,
 }
 
 /// Models the needed information from a request
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RequestResult {
     pub url: String,
     pub status: u16,
@@ -43,7 +43,7 @@ impl RequestResult {
 }
 
 /// Represents the results for the entire load test
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LoadResults {
     pub total_requests: usize,
     pub successes: usize,

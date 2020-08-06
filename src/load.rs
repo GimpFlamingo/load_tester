@@ -1,7 +1,7 @@
 use rand::{seq::SliceRandom, thread_rng};
 use std::time::Instant;
 use std::{error::Error, time};
-use tokio::prelude::*;
+use tokio::task;
 
 use crate::error::Result;
 use crate::models;
@@ -40,7 +40,7 @@ async fn perform_request(url: &str) -> Result<models::RequestResult> {
 }
 
 async fn build_request(url: String, run: usize) -> Result<RequestResult> {
-    Ok(tokio::spawn(async move {
+    Ok(task::spawn(async move {
         // Make the requests
         let result = perform_request(&url).await;
         // Save results into struct
@@ -54,9 +54,26 @@ async fn build_request(url: String, run: usize) -> Result<RequestResult> {
                 RequestResult::new(&url, 500, Duration::new(0, 0), 0 as usize)
             }
         }
-        // End single run timer
     })
     .await?)
+}
+
+async fn perform_runs(config: &models::Config) -> Result<models::LoadResults> {
+    let mut requests = vec![];
+    let mut load_results = models::LoadResults::new();
+    for run in 0..config.runs {
+        // Before each run need to shuffle the urls. Try and pause timer before here
+        let urls = shuffle(&config.urls);
+        // For each url make a request
+        for url in urls {
+            requests.push(build_request(url, run as usize).await.unwrap())
+        }
+        for request in requests.drain(..) {
+            load_results.add_result(request);
+        }
+    }
+
+    Ok(load_results)
 }
 
 /// Runs the load tests
@@ -65,21 +82,9 @@ async fn build_request(url: String, run: usize) -> Result<RequestResult> {
 /// `config.runs` times, At the beginning of each loop, all the urls will be randomly shuffled. Then,
 /// a get request will be made to each url with their results being saved to a `LoadResults` struct
 /// and returned.
-pub async fn run_load_test(config: &models::Config) -> Result<models::LoadResults> {
-    let mut requests = vec![];
-    let mut load_results = models::LoadResults::new();
-    for run in 0..config.runs {
-        // Before each run need to shuffle the urls. Try and pause timer before here
-        let urls = shuffle(&config.urls);
-        // Resume timer here
-        // For each url make a request
-        for url in urls {
-            requests.push(build_request(url, run as usize).await?)
-        }
-        for request in requests.drain(..) {
-            load_results.add_result(request);
-        }
-    }
+pub async fn run_load_test(config_orig: &models::Config) -> Result<models::LoadResults> {
+    let config = config_orig.clone();
+    let load_results = task::spawn(async move { perform_runs(&config).await.unwrap() });
     // Wait for each request to finish
-    Ok(load_results)
+    Ok(load_results.await?)
 }
