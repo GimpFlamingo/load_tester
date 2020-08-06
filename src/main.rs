@@ -1,21 +1,17 @@
 use ron::de::from_reader;
-use std::{
-    collections::HashMap,
-    env,
-    error::Error,
-    fs::File,
-    time::Instant,
-};
+use std::{collections::HashMap, env, error::Error, fs::File, time::Instant};
 
+mod error;
 mod load;
 mod models;
 mod statistics;
 
 use crate::load::run_load_test;
 use models::Config;
+use error::Result;
 
 /// Loads the config.ron file into a struct
-fn load_config() -> Result<Config, Box<dyn Error>> {
+fn load_config() -> Result<Config> {
     let input_path = format!("{}/config.ron", env!("CARGO_MANIFEST_DIR"));
     let f = File::open(&input_path)?;
     let config: Config = from_reader(f)?;
@@ -24,7 +20,7 @@ fn load_config() -> Result<Config, Box<dyn Error>> {
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<()> {
     // Load config file
     let config = load_config()?;
     let start_time = Instant::now();
@@ -32,5 +28,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let end_time = Instant::now();
     load_results.total_time = end_time.duration_since(start_time).as_secs_f64();
 
+    println!("{:#?}", load_results);
+
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
 }
