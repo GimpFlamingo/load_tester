@@ -11,3 +11,4 @@ ron = "0.6.0"
 serde = "1.0.114"
 tokio = {version = "0.2.22", features = ["full"]}
 hyper = "0.13.7"
+rand = "0.7.3"
