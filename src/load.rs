@@ -96,8 +96,7 @@ async fn perform_runs(config: &Config) -> Result<LoadResults> {
 /// `config.runs` times, At the beginning of each loop, all the urls will be randomly shuffled. Then,
 /// a get request will be made to each url with their results being saved to a `LoadResults` struct
 /// and returned.
-pub async fn run_load_test(config_orig: &Config) -> Result<LoadResults> {
-    let config = config_orig.clone();
+pub async fn run_load_test(config: &Config) -> Result<LoadResults> {
     // let load_results = task::spawn(async move { perform_runs(&config).await.unwrap() });
     let load_results = perform_runs(&config);
     // Wait for each request to finish
