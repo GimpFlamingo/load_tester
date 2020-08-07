@@ -5,6 +5,7 @@ mod error;
 mod load;
 mod models;
 mod statistics;
+mod display;
 
 use crate::load::run_load_test;
 use error::Result;
@@ -27,6 +28,7 @@ async fn main() -> Result<()> {
     let mut load_results = run_load_test(&config).await?;
     let end_time = Instant::now();
     load_results.total_time = end_time.duration_since(start_time).as_secs_f64();
+    statistics::calculate_statistics(&mut load_results);
 
     println!("{:#?}", load_results);
 
