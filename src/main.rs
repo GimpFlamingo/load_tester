@@ -1,11 +1,11 @@
 use ron::de::from_reader;
 use std::{env, fs::File, time::Instant};
 
+mod display;
 mod error;
 mod load;
 mod models;
 mod statistics;
-mod display;
 
 use crate::load::run_load_test;
 use error::Result;
