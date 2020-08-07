@@ -5,7 +5,7 @@ use std::time::Duration;
 #[derive(Debug, Deserialize, Clone)]
 pub struct Config {
     pub urls: Vec<String>,
-    pub runs: i32,
+    pub runs: usize,
 }
 
 /// Models the needed information from a request
@@ -101,5 +101,17 @@ impl LoadResults {
             false => self.failures += 1,
         }
         self.results.push(res);
+    }
+
+    /// Adds a vector of results to the struct
+    pub fn add_results(&mut self, results: Vec<RequestResult>) {
+        for res in results {
+            self.total_requests += 1;
+            match res.did_succeed {
+                true => self.successes += 1,
+                false => self.failures += 1,
+            }
+            self.results.push(res);
+        }
     }
 }
