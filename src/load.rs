@@ -47,16 +47,12 @@ async fn perform_request(url: String) -> Result<models::RequestResult> {
     ))
 }
 
-async fn start_runs(urls: Vec<String>) -> Result<Vec<RequestResult>> {
-    let mut requests = vec![];
-    for url in urls {
-        let url = url.clone();
-        let response = tokio::spawn(perform_request(url));
-    }
-
-    Ok(requests)
-}
-
+/// Performs each run
+///
+/// For each run create a tokio task. Then for each url that needs a request sent, create another task.
+/// Finally collect all the futures into a vector and parse out the request result. Once all the runs
+/// are finished, return a Result<LoadResult> with all the RequestResults added into the returned
+/// struct.
 async fn perform_runs(config: &models::Config) -> Result<LoadResults> {
     let mut load_results = LoadResults::new();
     let mut run_futures = vec![];
@@ -87,9 +83,12 @@ async fn perform_runs(config: &models::Config) -> Result<LoadResults> {
         });
         run_futures.push(result);
     }
+    // Collect the final results in a Vec<Result<Vec<RequestResult>>>
     let final_results = join_all(run_futures).await;
     let mut iter = final_results.iter();
+    // Iterate through each final result
     while let Some(run_val) = iter.next() {
+        // If the result is ok clone the vector and add it to the load results
         match run_val {
             Ok(request_result_vec) => {
                 load_results.add_results(request_result_vec.clone());
@@ -97,9 +96,6 @@ async fn perform_runs(config: &models::Config) -> Result<LoadResults> {
             Err(_) => (),
         }
     }
-    // for res in final_results {
-    //     simplify.push(res)
-    // }
 
     Ok(load_results)
 }
