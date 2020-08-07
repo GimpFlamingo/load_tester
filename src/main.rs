@@ -1,5 +1,5 @@
 use ron::de::from_reader;
-use std::{collections::HashMap, env, error::Error, fs::File, time::Instant};
+use std::{env, fs::File, time::Instant};
 
 mod error;
 mod load;
@@ -12,7 +12,7 @@ use models::Config;
 
 /// Loads the config.ron file into a struct
 fn load_config() -> Result<Config> {
-    let input_path = format!("{}/config.ron", env!("CARGO_MANIFEST_DIR"));
+    let input_path = format!(r#"{}\config.ron"#, env!("CARGO_MANIFEST_DIR"));
     let f = File::open(&input_path)?;
     let config: Config = from_reader(f)?;
 

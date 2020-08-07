@@ -31,11 +31,7 @@ impl RequestResult {
         RequestResult {
             url: String::from(url),
             status,
-            did_succeed: if status > 199 && status < 300 {
-                true
-            } else {
-                false
-            },
+            did_succeed: status > 199 && status < 300,
             duration: dur.as_secs_f64(),
             run: run_num,
         }
@@ -73,37 +69,10 @@ impl LoadResults {
         }
     }
 
-    /// Adds a result to the LoadResults
-    ///
-    /// Adds a result to LoadResults. It will also increment total_requests and success or failures
-    /// based on the information provided from the new RequestResult
-    ///
-    /// # Examples
-    /// ```
-    /// let mut load_result = LoadResult::new();
-    /// let request_result = RequestResult::new("localhost:5001", 200, 2.0);
-    ///
-    /// load_result.add_result(request_result);
-    ///
-    /// /* load_result.results is now results: [
-    ///     RequestResult{
-    ///         url: "localhost:5001",
-    ///         status: 200,
-    ///         did_succeed: 200,
-    ///         duration: 2.0
-    ///     }
-    /// ] */
-    /// ```
-    pub fn add_result(&mut self, res: RequestResult) {
-        self.total_requests += 1;
-        match res.did_succeed {
-            true => self.successes += 1,
-            false => self.failures += 1,
-        }
-        self.results.push(res);
-    }
-
     /// Adds a vector of results to the struct
+    ///
+    /// Adds a vector of result to LoadResults. It will also increment total_requests and success
+    /// or failures based on the information provided from each RequestResult
     pub fn add_results(&mut self, results: Vec<RequestResult>) {
         for res in results {
             self.total_requests += 1;
